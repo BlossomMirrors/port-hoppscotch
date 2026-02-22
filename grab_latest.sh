@@ -6,27 +6,27 @@ METADATA_FILE="com.hoppscotch.Hoppscotch.metainfo.xml"
 REPO_URL="https://github.com/hoppscotch/releases/releases/download"
 ALLOW_PRERELEASE=$(grep -m1 'allow-prerelease:' fetch.config.yml | awk '{print $2}')
 
-# --- Set prerelease behaviour ---
-if [[ "$ALLOW_PRERELEASE" == "true" ]]; then
-    FILTER=".prerelease == true or .prerelease == false"
-else
-    FILTER=".prerelease == false"
-fi
+# --- Fetch latest Hoppscotch tag ---
+echo "   Fetching latest tag from GitHub API..."
 
-# --- Fetch latest Hoppscotch release ---
-LATEST_JSON=$(curl -s https://api.github.com/repos/hoppscotch/releases/releases \
-  | jq -c "[.[] | select(.tag_name != null and ($FILTER))] | sort_by(.created_at) | last")
-
-LATEST_TAG=$(echo "$LATEST_JSON" | jq -r '.tag_name')
-IS_PRERELEASE=$(echo "$LATEST_JSON" | jq -r '.prerelease')
-
-# Remove 'v' prefix from version
-LATEST_VERSION=${LATEST_TAG#v}
+LATEST_TAG=$(curl -s https://api.github.com/repos/hoppscotch/releases/tags \
+  | jq -r '.[0].name')
 
 if [[ -z "$LATEST_TAG" || "$LATEST_TAG" == "null" ]]; then
   echo "   Failed to fetch latest version tag from GitHub."
   exit 1
 fi
+
+# Remove initial char 'v'
+LATEST_VERSION=${LATEST_TAG#v}
+
+# Prerelease hypothesis
+IS_PRERELEASE="false"
+if [[ "$LATEST_TAG" == *"beta"* || "$LATEST_TAG" == *"alpha"* ]]; then
+    IS_PRERELEASE="true"
+fi
+
+echo "   Found Tag: $LATEST_TAG (Clean: $LATEST_VERSION)"
 
 if [[ "$IS_PRERELEASE" == "true" ]]; then
   echo "   Latest release is a prerelease: $LATEST_VERSION"
