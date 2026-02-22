@@ -54,8 +54,8 @@ modules:
 
     sources:
       - type: file
-        url: https://github.com/hoppscotch/releases/releases/download/v26.1.0-0/Hoppscotch_linux_x64.deb
-        sha256: a6fe8c7f236771f56bd565289e1a55cff47ac6584442195be9fa5b61f31c7ccc
+        url: https://github.com/hoppscotch/releases/releases/download/v26.1.1-0/Hoppscotch_linux_x64.deb
+        sha256: dd63605eb2e5e84876dcaf164e354527d090964660ef32ac4a37286940106688
         dest-filename: hoppscotch.deb
       - type: file
         path: com.hoppscotch.Hoppscotch.metainfo.xml
