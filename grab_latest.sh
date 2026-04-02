@@ -76,7 +76,7 @@ else
 fi
 
 # --- Compute new SHA256 ---
-DOWNLOAD_URL="$REPO_URL/$LATEST_VERSION/Hoppscotch_linux_x64.deb"
+DOWNLOAD_URL="$REPO_URL/v$LATEST_VERSION/Hoppscotch_linux_x64.deb"
 echo "   Downloading $DOWNLOAD_URL to compute sha256..."
 TMP_FILE=$(mktemp)
 HTTP_CODE=$(curl -L -s -w "%{http_code}" -o "$TMP_FILE" "$DOWNLOAD_URL")
