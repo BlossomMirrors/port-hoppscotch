@@ -42,7 +42,7 @@ else
 fi
 
 # --- Extract current version from manifest ---
-CURRENT_VERSION=$(grep -Po 'download/v\K[0-9]+\.[0-9]+\.[0-9]+(-[0-9]+)?' "$MANIFEST_FILE" | head -n1)
+CURRENT_VERSION=$(grep -Po 'download/\Kv[0-9]+\.[0-9]+\.[0-9]+(-[0-9]+)?' "$MANIFEST_FILE" | head -n1)
 CURRENT_DATE=$(date '+%Y-%m-%d')
 
 # --- Create temp file with version number ---
@@ -55,7 +55,7 @@ if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
 else
   echo "   Updating manifest from $CURRENT_VERSION → $LATEST_VERSION"
   # --- Replace version strings ---
-  $SED_INPLACE -E "s|(download/v)$CURRENT_VERSION|\1$LATEST_VERSION|g" "$MANIFEST_FILE"
+  $SED_INPLACE -E "s|(download/)$CURRENT_VERSION|\1$LATEST_VERSION|g" "$MANIFEST_FILE"
   $SED_INPLACE -E "s|(<release version=['\"])$CURRENT_VERSION|\1$LATEST_VERSION|g" "$METADATA_FILE"
   $SED_INPLACE -E "s|(<release date=['\"])[0-9]{4}-[0-9]{2}-[0-9]{2}|\1$CURRENT_DATE|g" "$METADATA_FILE"
   # --- Update version number ---
