@@ -1,11 +1,11 @@
 name: Hoppscotch Auto Update
 
 on:
-  schedule:
-    - cron: "0 8 * * *" # runs every day at 08:00 UTC
+  #schedule:
+  #  - cron: "0 8 * * *" # runs every day at 08:00 UTC
   workflow_dispatch:
-  push:
-    branches: [main]
+  #push:
+  #  branches: [main]
 
 permissions:
   contents: write
