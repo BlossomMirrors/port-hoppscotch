@@ -24,7 +24,7 @@ if [[ -z "$LATEST_TAG" || "$LATEST_TAG" == "null" ]]; then
 fi
 
 # Removes unnecessary 'v' chars at the beginning
-LATEST_TAG=${LATEST_TAG#v}
+# LATEST_TAG=${LATEST_TAG#v}
 LATEST_VERSION=$(echo "$LATEST_TAG" | sed 's/^v*//')
 
 # Prerelease hypothesis
