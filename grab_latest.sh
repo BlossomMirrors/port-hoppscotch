@@ -16,7 +16,7 @@ fi
 echo "   Fetching latest tag from GitHub API..."
 
 LATEST_TAG=$(curl -s https://api.github.com/repos/hoppscotch/releases/tags \
-  | jq -r '.[0].name')
+  | jq -r 'map(select(.name != "vv26.3.0-0")) | .[0].name')
 
 if [[ -z "$LATEST_TAG" || "$LATEST_TAG" == "null" ]]; then
   echo "   Failed to fetch latest version tag from GitHub."
