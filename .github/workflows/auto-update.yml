@@ -11,66 +11,105 @@ permissions:
   contents: write
 
 jobs:
-  update-hoppscotch:
+  # 1. Update the Manifest File
+  update-manifest:
     runs-on: ubuntu-latest
+    outputs:
+      changes_detected: ${{ steps.check.outputs.changes_detected }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Git
+          
+      - name: Run update script
+        run: bash ./grab_latest.sh
+        
+      - name: Check and Commit
+        id: check
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Run update script
-        run: bash ./grab_latest.sh
-
-      - name: Check if version was updated
-        id: check_diff
-        run: |
-          if git diff --quiet HEAD~1 HEAD -- com.hoppscotch.Hoppscotch.yml; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+          
+          if [[ -n $(git status -s com.hoppscotch.Hoppscotch.yml) ]]; then
+            echo "changes_detected=true" >> "$GITHUB_OUTPUT"
+            VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
+            git add com.hoppscotch.Hoppscotch.yml com.hoppscotch.Hoppscotch.metainfo.xml version.txt
+            git commit -m "update: hoppscotch $VERSION"
+            git push origin HEAD:main
           else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changes_detected=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create new tag and release
-        if: steps.check_diff.outputs.changed == 'true'
+  # 2. Build the Flatpaks
+  build-flatpak:
+    needs: update-manifest
+    if: needs.update-manifest.outputs.changes_detected == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Mark safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install Flatpak Builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+
+      - name: Setup Flathub
+        run: flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build and Bundle
+        run: |
+          VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
+          flatpak-builder --user --repo=repo --force-clean --install-deps-from=flathub build-dir com.hoppscotch.Hoppscotch.yml
+          flatpak build-bundle repo "hoppscotch-${VERSION}-x64.flatpak" com.hoppscotch.Hoppscotch
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-x64
+          path: "*.flatpak"
+
+  # 3. Create the Release
+  release:
+    needs: [update-manifest, build-flatpak]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Install GH CLI
+        run: |
+          curl -s https://api.github.com/repos/cli/cli/releases/latest \
+            | python3 -c "import sys, json; print([a['browser_download_url'] for a in json.load(sys.stdin)['assets'] if 'linux_amd64.tar.gz' in a['name']][0])" \
+            | xargs curl -L -o gh.tar.gz
+          tar -xzf gh.tar.gz
+          sudo install -Dm755 gh_*_linux_amd64/bin/gh /usr/local/bin/gh
+
+      - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Extract version and prerelease info
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
           IS_PRERELEASE=$(grep -m1 'prerelease:' version.txt | awk '{print $2}')
-          echo "Detected new version: $VERSION"
-          echo "Is prerelease: $IS_PRERELEASE"
-
-          # Check if tag already exists remotely
-          if git ls-remote --exit-code --tags origin "v$VERSION" >/dev/null 2>&1; then
-            echo "Tag v$VERSION already exists on remote, skipping release."
-            exit 0
-          fi
-
-          # Create Git tag and push
-          git tag -a "v$VERSION" -m "Hoppscotch $VERSION"
-          git push origin "v$VERSION"
-
-          # Create GitHub release (pre or normal)
-          if [[ "$IS_PRERELEASE" == "true" ]]; then
-            echo "Creating prerelease for v$VERSION..."
-            gh release create "v$VERSION" \
-              --title "$VERSION" \
-              --notes "Automated update to prerelease Hoppscotch version $VERSION" \
-              --generate-notes \
-              --prerelease
-          else
-            echo "Creating stable release for v$VERSION..."
-            gh release create "v$VERSION" \
-              --title "$VERSION" \
-              --notes "Automated update to Hoppscotch version $VERSION" \
-              --generate-notes
-          fi
-
-          echo "Release process complete."
+          FLAGS=""
+          if [[ "$IS_PRERELEASE" == "true" ]]; then FLAGS="--prerelease"; fi
+          
+          # Upload all downloaded flatpak artifacts
+          gh release create "$VERSION" \
+            artifacts/*.flatpak \
+            --target main \
+            --title "$VERSION" \
+            --notes "Automated update to Hoppscotch version $VERSION" \
+            --generate-notes \
+            $FLAGS
