@@ -33,7 +33,7 @@ body:
       label: Upstream Check
       description: Have you verified this is not an upstream or configuration issue?
       options:
-        - label: I have confirmed that this issue is specific to the Flatpak packaging (not Hoppscotch upstream or ungoogled-chromium upstream)
+        - label: I have confirmed that this issue is specific to the Flatpak packaging (not Hoppscotch upstream)
           required: true
 
   - type: textarea
