@@ -65,12 +65,12 @@ jobs:
         run: |
           VERSION=$(grep -m1 'version:' version.txt | awk '{print $2}')
           flatpak-builder --user --repo=repo --force-clean --install-deps-from=flathub build-dir com.hoppscotch.Hoppscotch.yml
-          flatpak build-bundle repo "hoppscotch-${VERSION}-x64.flatpak" com.hoppscotch.Hoppscotch
+          flatpak build-bundle repo "hoppscotch-${VERSION}_x64.flatpak" com.hoppscotch.Hoppscotch
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: flatpak-x64
+          name: flatpak_x64
           path: "*.flatpak"
 
   # 3. Create the Release

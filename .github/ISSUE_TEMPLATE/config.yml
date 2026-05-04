@@ -1,0 +1,82 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["bug", "triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report 🙌
+
+  - type: input
+    id: distribution
+    attributes:
+      label: Distribution
+      description: Which distribution are you using? (e.g. Ubuntu, Fedora, Arch, etc.)
+      placeholder: e.g. Ubuntu 24.04
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which version of Hoppscotch are you running?
+      placeholder: e.g. 1.2.3
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: upstream-check
+    attributes:
+      label: Upstream Check
+      description: Have you verified this is not an upstream or configuration issue?
+      options:
+        - label: I have confirmed that this issue is specific to the Flatpak packaging (not Hoppscotch upstream or ungoogled-chromium upstream)
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Provide a detailed description of the issue
+      placeholder: What exactly is happening?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the issue
+      placeholder: |
+        1. Open the app
+        2. Click on ...
+        3. Observe the issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What is currently happening?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Logs, screenshots, or any other relevant information
+    validations:
+      required: false
