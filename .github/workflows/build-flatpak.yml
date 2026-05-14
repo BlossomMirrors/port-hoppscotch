@@ -45,6 +45,11 @@ jobs:
         run: |
           flatpak-builder --repo=repo --force-clean --install-deps-from=flathub build-dir com.hoppscotch.Hoppscotch.yml
 
+      - name: Generate Repository Metadata
+        if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
+        run: |
+          flatpak build-update-repo --generate-static-deltas repo
+
       - name: Upload repo to gh-pages
         if: github.event_name == 'workflow_dispatch' || steps.check_commits.outputs.recent_commit == 'true'
         uses: peaceiris/actions-gh-pages@v4
