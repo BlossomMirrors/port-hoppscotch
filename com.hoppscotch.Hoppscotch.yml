@@ -43,7 +43,7 @@ modules:
       - |
         echo '@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");' > /app/share/themes/Hoppscotch/gtk-3.0/gtk.css
       - |
-        echo 'menubar { display: none; min-height: 0; height: 0; padding: 0; margin: 0; }' >> /app/share/themes/Hoppscotch/gtk-3.0/gtk.css
+        echo 'menubar, menubar * { min-height: 0px !important; height: 0px !important; padding: 0px !important; margin: 0px !important; border: none !important; font-size: 0px !important; color: transparent !important; background: transparent !important; background-image: none !important; box-shadow: none !important; }' >> /app/share/themes/Hoppscotch/gtk-3.0/gtk.css
 
       - install -Dm644 usr/share/applications/Hoppscotch.desktop /app/share/applications/com.hoppscotch.Hoppscotch.desktop
       - install -Dm644 com.hoppscotch.Hoppscotch.metainfo.xml /app/share/metainfo/com.hoppscotch.Hoppscotch.metainfo.xml
@@ -62,8 +62,8 @@ modules:
 
     sources:
       - type: file
-        url: https://github.com/hoppscotch/releases/releases/download/v26.5.0-0/Hoppscotch_linux_x64.deb
-        sha256: 2b4fa39949264ae28c38317176f750b04887c57a2a52b70d9b1037415f3d7dcc
+        url: https://github.com/hoppscotch/releases/releases/download/v26.4.1-0/Hoppscotch_linux_x64.deb
+        sha256: 750ea3221054bda16ae14d2abd1aaab128ec9101a07191bad4761676caecb330
         dest-filename: hoppscotch.deb
       - type: file
         path: com.hoppscotch.Hoppscotch.metainfo.xml
