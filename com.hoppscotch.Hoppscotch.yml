@@ -18,7 +18,7 @@ finish-args:
   - --env=DCONF_USER_CONFIG_DIR=.config/dconf
   - --filesystem=xdg-run/dconf
   - --filesystem=~/.config/dconf:ro
-  - --env=GTK_THEME=Hoppscotch
+  - --env=GTK_THEME=Adwaita:dark
   # --- GPU-specific fixes ---
   - --env=WEBKIT_DISABLE_DMABUF_RENDERER=1
 
@@ -33,24 +33,15 @@ modules:
       - mkdir -p /app/share
       - mkdir -p /app/share/applications
       - mkdir -p /app/share/icons
-      - mkdir -p /app/share/themes/Hoppscotch/gtk-3.0
       - mkdir -p /app/etc/gtk-3.0
 
       - install -Dm755 usr/bin/hoppscotch-desktop /app/bin/hoppscotch
 
       - cp -r usr/share/icons/* /app/share/icons
 
-      # Create custom GTK theme to force dark mode and hide menubar
+      # Create system-wide GTK3 CSS overrides and settings inside the sandbox to hide the menubar
       - |
-        echo '@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");' > /app/share/themes/Hoppscotch/gtk-3.0/gtk.css
-      - |
-        echo '@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");' > /app/share/themes/Hoppscotch/gtk-3.0/gtk-dark.css
-      - |
-        echo 'menubar, menubar * { min-height: 0px !important; height: 0px !important; padding: 0px !important; margin: 0px !important; border: none !important; font-size: 0px !important; color: transparent !important; background: transparent !important; background-image: none !important; box-shadow: none !important; }' >> /app/share/themes/Hoppscotch/gtk-3.0/gtk.css
-      - |
-        echo 'menubar, menubar * { min-height: 0px !important; height: 0px !important; padding: 0px !important; margin: 0px !important; border: none !important; font-size: 0px !important; color: transparent !important; background: transparent !important; background-image: none !important; box-shadow: none !important; }' >> /app/share/themes/Hoppscotch/gtk-3.0/gtk-dark.css
-
-      # Force GTK to think the desktop shell displays the menu bar, hiding it in the app window
+        echo 'menubar, menubar * { min-height: 0px !important; height: 0px !important; padding: 0px !important; margin: 0px !important; border: none !important; font-size: 0px !important; color: transparent !important; background: transparent !important; background-image: none !important; box-shadow: none !important; }' > /app/etc/gtk-3.0/gtk.css
       - |
         echo -e "[Settings]\ngtk-shell-shows-menubar=1\ngtk-shell-shows-app-menu=1" > /app/etc/gtk-3.0/settings.ini
 
@@ -71,8 +62,8 @@ modules:
 
     sources:
       - type: file
-        url: https://github.com/hoppscotch/releases/releases/download/v26.5.0-0/Hoppscotch_linux_x64.deb
-        sha256: 2b4fa39949264ae28c38317176f750b04887c57a2a52b70d9b1037415f3d7dcc
+        url: https://github.com/hoppscotch/releases/releases/download/v26.4.1-0/Hoppscotch_linux_x64.deb
+        sha256: 750ea3221054bda16ae14d2abd1aaab128ec9101a07191bad4761676caecb330
         dest-filename: hoppscotch.deb
       - type: file
         path: com.hoppscotch.Hoppscotch.metainfo.xml
